@@ -26,6 +26,17 @@ def LU_decomposition(size, A):
 
 
 def LU_solve(size, L, U, B):
+
+    Y = [0 for _ in range(size)]
+    X = [0 for _ in range(size)]
+    for i in range(size):
+        Y[i] = B[i] - sum(L[i][j] * Y[j] for j in range(i))
+    for i in reversed(range(size)):
+        z = sum(U[i][j] * X[j] for j in range(i + 1, size))
+        X[i] = (Y[i] - z) / U[i][i]
+    return X
+
+    """
     Z = [0 for _ in range(size)]
     for i in range(0, size):
         Z[i] = B[i] - sum(L[i][j] * Z[j] for j in range(i - 1))
@@ -35,6 +46,7 @@ def LU_solve(size, L, U, B):
         X[i] = (1 / U[i][i]) * (Z[i] - sum(U[i][j] * X[j]
                                            for j in range(i + 1, size)))
     return X
+    """
 
 
 def tridiagonal(size, A, B):

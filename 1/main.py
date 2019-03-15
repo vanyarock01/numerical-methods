@@ -44,5 +44,5 @@ def show_tridiagonal(data):
 if __name__ == '__main__':
     with open('matrix.json', 'r') as json_data:
         data = json.load(json_data)
-        # show_LU(data)
-        show_tridiagonal(data)
+        show_LU(data)
+        #show_tridiagonal(data)
