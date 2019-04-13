@@ -1,3 +1,6 @@
+import utils
+import math
+
 # TODO: перестановки
 def LU_decomposition(size, A):
     L = [[0.0 for _ in range(size)] for _ in range(size)]
@@ -61,34 +64,8 @@ def tridiagonal(size, A, B):
     return x
 
 
-def mv_mult(size, matrix, vector):
-    R = [0.0 for _ in range(size)]
-    for i in range(size):
-        for j in range(size):
-            R[i] += matrix[i][j] * vector[j]
-    return R
-
-
-def vv_substr(size, vec1, vec2):
-    return [vec1[i] - vec2[i] for i in range(size)]
-
-
-def vv_add(size, vec1, vec2):
-    return [vec1[i] + vec2[i] for i in range(size)]
-
-
-def v_norm(size, vec):
-    return sum(abs(vec[i]) for i in range(size))
-
-
-def m_norm(size, matrix):
-    v = [sum(matrix[i][j] for i in range(size)) for j in range(size)]
-    return max(v)
-
-
 def simple_iteration(size, A, B, precision=0.01):
     A = [row.copy() for row in A]
-    # X = [0.0 for _ in range(size)]
 
     alpha = [[0.0 for _ in range(size)] for _ in range(size)]
     beta = [0.0 for _ in range(size)]
@@ -99,16 +76,34 @@ def simple_iteration(size, A, B, precision=0.01):
             alpha[i][j] = -A[i][j] / A[i][i]
         alpha[i][i] = 0
 
-    q = m_norm(size, alpha)
-    print(q)
+    q = utils.m_norm(size, alpha)
     cur = beta.copy()
     last = []
     while True:
         last = cur
-        mult = mv_mult(size, alpha, cur)
-        cur = vv_add(size, beta, mult)
-        print(v_norm(size, vv_substr(size, cur, last)))
-        if v_norm(size, vv_substr(size, cur, last)) <= precision * (1 - q) / q:
+        mult = utils.mv_mult(size, alpha, cur)
+        cur = utils.vv_add(size, beta, mult)
+        norma = utils.v_norm(
+            size, utils.vv_substr(size, cur, last))
+        if norma <= precision * (1 - q) / q:
             break
 
     return cur
+
+
+def zeidel_method(size, A, B, precision=0.01):
+    x = [0.0 for i in range(size)]
+
+    cov = False
+    while not cov:
+        x_next = x.copy()
+        for i in range(size):
+            S1 = sum(A[i][j] * x_next[j] for j in range(i))
+            S2 = sum(A[i][j] * x[j] for j in range(i + 1, size))
+            x_next[i] = (B[i] - S1 - S2) / A[i][i]
+
+        cov = math.sqrt(sum((x_next[i] - x[i]) ** 2 for i in range(size))) <= precision
+        x = x_next
+
+    return x
+

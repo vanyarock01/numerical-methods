@@ -49,9 +49,18 @@ def show_simple_iteration(data):
     utils.vector_print(X, header="X")
     utils.vector_print(np.linalg.solve(A, B), header="LINALG SOLVE")
 
+def show_zeidel_method(data):
+    size = data[2]['size']
+    A = data[2]['A']
+    B = data[2]['B']
+    utils.matrix_print(A, header="A")
+    utils.vector_print(B, header="B")
+    X = algo.zeidel_method(size, A, B)
+    utils.vector_print(X, header="X")
+    utils.vector_print(np.linalg.solve(A, B), header="LINALG SOLVE")
 
 if __name__ == '__main__':
     with open('matrix.json', 'r') as json_data:
         data = json.load(json_data)
-        print("LU decomposition")
-        show_simple_iteration(data)
+        print("zeidel")
+        show_zeidel_method(data)

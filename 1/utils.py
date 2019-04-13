@@ -13,3 +13,28 @@ def vector_print(vec, header=None):
     for i in range(len(vec)):
         print('{:6.2f}'.format(float(vec[i])), end=' ')
     print()
+
+
+def mv_mult(size, matrix, vector):
+    R = [0.0 for _ in range(size)]
+    for i in range(size):
+        for j in range(size):
+            R[i] += matrix[i][j] * vector[j]
+    return R
+
+
+def vv_substr(size, vec1, vec2):
+    return [vec1[i] - vec2[i] for i in range(size)]
+
+
+def vv_add(size, vec1, vec2):
+    return [vec1[i] + vec2[i] for i in range(size)]
+
+
+def v_norm(size, vec):
+    return sum(abs(vec[i]) for i in range(size))
+
+
+def m_norm(size, matrix):
+    v = [sum(matrix[i][j] for i in range(size)) for j in range(size)]
+    return max(v)
