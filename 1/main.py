@@ -13,36 +13,45 @@ def show_LU(data):
     B = data[0]['B']
 
     L, U = algo.LU_decomposition(size, A)
-
-    print("matrix")
-    utils.matrix_print(A)
-    print("L")
-    utils.matrix_print(L)
-    print("U")
-    utils.matrix_print(U)
-    print('L * U')
-
     X = algo.LU_solve(size, L, U, B)
-    a = np.array(L)
-    b = np.array(U)
-    r = np.matmul(a, b)
-    utils.matrix_print(r)
-    print('X')
-    utils.vector_print(X)
-    print('NP')
-    utils.vector_print(np.linalg.solve(A, B))
+
+    npL = np.array(L)
+    npU = np.array(U)
+    np_matrix = np.matmul(npL, npU)
+
+    utils.matrix_print(A, header="matrix")
+    utils.matrix_print(L, header="L")
+    utils.matrix_print(U, header="U")
+
+    utils.matrix_print(np_matrix, header="L * U")
+    utils.vector_print(X, header="X")
+    utils.vector_print(np.linalg.solve(A, B), header="LINALG SOLVE")
 
 
 def show_tridiagonal(data):
     size = data[1]['size']
     A = data[1]['A']
     B = data[1]['B']
-    x = algo.tridiagonal(size, A, B)
-    utils.vector_print(x)
-    utils.vector_print(np.linalg.solve(A, B))
+    utils.matrix_print(A, header="A")
+    utils.vector_print(B, header="B")
+    X = algo.tridiagonal(size, A, B)
+    utils.vector_print(X, header="X")
+    utils.vector_print(np.linalg.solve(A, B), header="LINALG SOLVE")
+
+
+def show_simple_iteration(data):
+    size = data[2]['size']
+    A = data[2]['A']
+    B = data[2]['B']
+    utils.matrix_print(A, header="A")
+    utils.vector_print(B, header="B")
+    X = algo.simple_iteration(size, A, B)
+    utils.vector_print(X, header="X")
+    utils.vector_print(np.linalg.solve(A, B), header="LINALG SOLVE")
+
 
 if __name__ == '__main__':
     with open('matrix.json', 'r') as json_data:
         data = json.load(json_data)
-        show_LU(data)
-        #show_tridiagonal(data)
+        print("LU decomposition")
+        show_simple_iteration(data)

@@ -1,52 +1,44 @@
+# TODO: перестановки
 def LU_decomposition(size, A):
     L = [[0.0 for _ in range(size)] for _ in range(size)]
-    U = [[0.0 for _ in range(size)] for _ in range(size)]
+    U = [row.copy() for row in A]
 
     for i in range(size):
         L[i][i] = 1
-        max_elem = abs(U[i][i])
-        row = i
-        for k in range(i + 1, size):
-            if abs(U[k][i]) > max_elem:
-                row = k
-                max_elem = abs(U[k][i])
+        if U[i][i] == 0:
+            max_elem = abs(U[i][i])
+            row = i
+            for k in range(i + 1, size):
+                if abs(U[k][i]) > max_elem:
+                    row = k
+                    max_elem = abs(U[k][i])
 
-        for k in range(i, size):
-            U[row][k], U[i][k] = U[i][k], U[row][k]
+            for k in range(i, size):
+                U[k][row], U[k][i] = U[k][i], U[k][row]
 
-        for j in range(i + 1):
-            s = sum(U[k][i] * L[j][k] for k in range(j))
-            U[j][i] = A[j][i] - s
+        for j in range(i + 1, size):
+            L[j][i] = U[j][i] / U[i][i]
+            for k in range(i + 1, size):
+                U[j][k] -= L[j][i] * U[i][k]
 
-        for j in range(i, size):
-            s = sum(U[k][i] * L[j][k] for k in range(i))
-            L[j][i] = (A[j][i] - s) / U[i][i]
+    for i in range(1, size):
+        for j in range(i):
+            U[i][j] = 0.0
 
     return L, U
 
 
 def LU_solve(size, L, U, B):
-
-    Y = [0 for _ in range(size)]
+    Z = [0 for _ in range(size)]
     X = [0 for _ in range(size)]
+
     for i in range(size):
-        Y[i] = B[i] - sum(L[i][j] * Y[j] for j in range(i))
+        Z[i] = B[i] - sum(L[i][j] * Z[j] for j in range(i))
+
     for i in reversed(range(size)):
         z = sum(U[i][j] * X[j] for j in range(i + 1, size))
-        X[i] = (Y[i] - z) / U[i][i]
+        X[i] = (Z[i] - z) / U[i][i]
     return X
-
-    """
-    Z = [0 for _ in range(size)]
-    for i in range(0, size):
-        Z[i] = B[i] - sum(L[i][j] * Z[j] for j in range(i - 1))
-
-    X = [0 for _ in range(size)]
-    for i in reversed(range(size)):
-        X[i] = (1 / U[i][i]) * (Z[i] - sum(U[i][j] * X[j]
-                                           for j in range(i + 1, size)))
-    return X
-    """
 
 
 def tridiagonal(size, A, B):
@@ -67,3 +59,56 @@ def tridiagonal(size, A, B):
         x[i] = (d[i] - c[i] * x[i + 1]) / b[i]
 
     return x
+
+
+def mv_mult(size, matrix, vector):
+    R = [0.0 for _ in range(size)]
+    for i in range(size):
+        for j in range(size):
+            R[i] += matrix[i][j] * vector[j]
+    return R
+
+
+def vv_substr(size, vec1, vec2):
+    return [vec1[i] - vec2[i] for i in range(size)]
+
+
+def vv_add(size, vec1, vec2):
+    return [vec1[i] + vec2[i] for i in range(size)]
+
+
+def v_norm(size, vec):
+    return sum(abs(vec[i]) for i in range(size))
+
+
+def m_norm(size, matrix):
+    v = [sum(matrix[i][j] for i in range(size)) for j in range(size)]
+    return max(v)
+
+
+def simple_iteration(size, A, B, precision=0.01):
+    A = [row.copy() for row in A]
+    # X = [0.0 for _ in range(size)]
+
+    alpha = [[0.0 for _ in range(size)] for _ in range(size)]
+    beta = [0.0 for _ in range(size)]
+
+    for i in range(size):
+        beta[i] = float(B[i]) / A[i][i]
+        for j in range(size):
+            alpha[i][j] = -A[i][j] / A[i][i]
+        alpha[i][i] = 0
+
+    q = m_norm(size, alpha)
+    print(q)
+    cur = beta.copy()
+    last = []
+    while True:
+        last = cur
+        mult = mv_mult(size, alpha, cur)
+        cur = vv_add(size, beta, mult)
+        print(v_norm(size, vv_substr(size, cur, last)))
+        if v_norm(size, vv_substr(size, cur, last)) <= precision * (1 - q) / q:
+            break
+
+    return cur
