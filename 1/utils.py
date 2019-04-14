@@ -23,6 +23,15 @@ def mv_mult(size, matrix, vector):
     return R
 
 
+def mm_mult(size, matrix1, matrix2):
+    R = [[0.0 for _ in range(size)] for _ in range(size)]
+
+    for i in range(size):
+        for j in range(size):
+            for k in range(size):
+                R[i][j] += matrix1[i][k] * matrix2[k][j]
+    return R           
+
 def vv_substr(size, vec1, vec2):
     return [vec1[i] - vec2[i] for i in range(size)]
 

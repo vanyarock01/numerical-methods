@@ -49,6 +49,7 @@ def show_simple_iteration(data):
     utils.vector_print(X, header="X")
     utils.vector_print(np.linalg.solve(A, B), header="LINALG SOLVE")
 
+
 def show_zeidel_method(data):
     size = data[2]['size']
     A = data[2]['A']
@@ -59,8 +60,23 @@ def show_zeidel_method(data):
     utils.vector_print(X, header="X")
     utils.vector_print(np.linalg.solve(A, B), header="LINALG SOLVE")
 
+
+def show_jacobi_rotate(data):
+    size = data[3]['size']
+    A = data[3]['A']
+    utils.matrix_print(A, header="A")
+    X, U = algo.rotate_jacobi(size, A)
+    utils.vector_print(X, header="X")
+    utils.matrix_print(U, header="U")
+    
+    X, U = np.linalg.eig(A)
+    utils.vector_print(X, header="LINALG SOLVE: X")
+    utils.matrix_print(U, header="LINALG SOLVE: U")
+
+
+
 if __name__ == '__main__':
     with open('matrix.json', 'r') as json_data:
         data = json.load(json_data)
-        print("zeidel")
-        show_zeidel_method(data)
+        print("jacobi rotate")
+        show_jacobi_rotate(data)

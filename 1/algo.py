@@ -1,6 +1,7 @@
 import utils
 import math
 
+
 # TODO: перестановки
 def LU_decomposition(size, A):
     L = [[0.0 for _ in range(size)] for _ in range(size)]
@@ -102,8 +103,53 @@ def zeidel_method(size, A, B, precision=0.01):
             S2 = sum(A[i][j] * x[j] for j in range(i + 1, size))
             x_next[i] = (B[i] - S1 - S2) / A[i][i]
 
-        cov = math.sqrt(sum((x_next[i] - x[i]) ** 2 for i in range(size))) <= precision
+        cov = math.sqrt(
+            sum((x_next[i] - x[i]) ** 2 for i in range(size))) <= precision
         x = x_next
 
     return x
 
+
+def rotate_jacobi(size, A, precision=0.1):
+    Ak = [row.copy() for row in A]
+
+    idx = range(size)
+    U = [[0. if i != j else 1. for i in idx] for j in idx]
+
+    cov = False
+    while not cov:
+        ik, jk = 0, 1
+        for i in range(size - 1):
+            for j in range(i + 1, size):
+                if abs(Ak[i][j]) > abs(Ak[ik][jk]):
+                    ik, jk = i, j
+
+        if Ak[ik][ik] == Ak[jk][jk]:
+            phi = math.pi / 4
+        else:
+            phi = 0.5 * math.atan(
+                2 * Ak[ik][jk] / (Ak[ik][ik] - Ak[jk][jk]))
+
+        Uk = [[0. if i != j else 1. for i in idx] for j in idx]
+        Uk[ik][jk] = math.sin(phi)
+        Uk[jk][ik] = -Uk[ik][jk]
+
+        Uk[ik][ik] = math.cos(phi)
+        Uk[jk][jk] = math.cos(phi)
+
+        tmp = utils.mm_mult(size, Uk, Ak)
+
+        Uk[ik][jk], Uk[jk][ik] = Uk[jk][ik], Uk[ik][jk]
+
+        Ak = utils.mm_mult(size, tmp, Uk)
+        U = utils.mm_mult(size, U, Uk)
+
+        accum = 0
+        for i in range(size - 1):
+            for j in range(i + 1, size):
+                accum += Ak[i][j] ** 2
+
+        avg = math.sqrt(accum)
+        if avg < precision:
+            cov = True
+    return [Ak[i][i] for i in range(size)], U
