@@ -31,7 +31,7 @@ def newton(f, df, x0, precision=0.0001):
         x = x_next
 
 
-def simple_iteration(phi, dphi, a, b, precision=0.000   1):
+def simple_iteration(phi, dphi, a, b, precision=0.01):
     q = max(abs(dphi(a, dfunc)), abs(dphi(b, dfunc)))
     x = (b - a) / 2
     x_next = x

@@ -11,6 +11,12 @@ System:
 # first function ---
 
 
+def printer(data):
+    for title, value in data.items():
+        print("| {} == {:7.4f} ".format(title, value), end='')
+    print('|')
+
+
 def f1(x1, x2):
     return x1 - math.cos(x2) - 2
 
@@ -82,22 +88,83 @@ def newton(x1, x2, precision=0.01):
     while True:
         k += 1
         x1_cur, x2_cur = getx(x1_prev, x2_prev, func)
-        
+
         epsilon = norm(
             (x1_cur,  x2_cur), (x1_prev, x2_prev))
-        print(
-            "x1: {:7.4f} | x2: {:7.4f} | eps: {:7.4f}"
-            .format(x1_cur, x2_cur, epsilon))
-        
+        printer(
+            {"x1": x1_cur, "x2": x2_cur, "eps": epsilon})
+
         if epsilon <= precision:
             break
         x1_prev, x2_prev = x1_cur, x2_cur
     return x1_cur, x2_cur
 
 
-def simple_iteration():
-    pass
+def ph1(x1, x2):
+    return math.cos(x2) + 2
+
+
+def ph2(x1, x2):
+    return math.sin(x1) + 2
+
+
+def dph1_dx1(x1, x2):
+    return 0
+
+
+def dph1_dx2(x1, x2):
+    return -math.sin(x2)
+
+
+def dph2_dx1(x1, x2):
+    return math.cos(x1)
+
+
+def dph2_dx2(x1, x2):
+    return 0
+
+
+phi = {
+    "ph1": ph1,
+    "ph2": ph2,
+
+    "dph1_dx1": dph1_dx1,
+    "dph1_dx2": dph1_dx2,
+    "dph2_dx1": dph2_dx1,
+    "dph2_dx2": dph2_dx2
+}
+
+
+def getq(x1, x2, phi):
+	return max(
+		abs(phi["dph1_dx1"](x1, x2)) + abs(phi["dph1_dx2"](x1, x2)),
+		abs(phi["dph2_dx1"](x1, x2)) + abs(phi["dph2_dx2"](x1, x2)))
+
+#TODO fix jumping
+def simple_iteration(x1, x2, precision=0.01):
+    x1_prev, x2_prev = x1_cur, x2_cur = x1, x2
+    k = 0
+    
+    q = getq(x1, x2, phi)
+    if q >= 1:
+    	print("leave G field")
+    	printer({"q": q})
+    while True:
+        k += 1
+        x1_cur, x2_cur = ph1(x1_prev, x2_prev), ph2(x1_prev, x2_prev) 
+        
+        epsilon = (q / (1 - q)) * norm(
+            (x1_cur,  x2_cur), (x1_prev, x2_prev))
+        printer(
+            {"x1": x1_cur, "x2": x2_cur, "eps": epsilon})
+        if epsilon <= precision:
+        	break
+        x1_prev, x2_prev = x1_cur, x2_cur
+    return x1_cur, x2_cur
 
 
 if __name__ == '__main__':
+    print("newton")
     newton(x1=0.5, x2=2, precision=0.001)
+    print("iteration")
+    simple_iteration(x1=0.5, x2=2, precision=0.0001)
