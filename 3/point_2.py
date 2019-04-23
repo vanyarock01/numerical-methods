@@ -1,5 +1,7 @@
 import math
-
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 
 var = """X* = -0.5
 i :      0       1       2        3        4
@@ -8,7 +10,7 @@ Fi: 2.8198, 2.3562, 0.7854, 0.32175, 0.19740.
 """
 
 raw_data = {
-    "X*": -0.5,
+    "x*": -0.5,
     "n": 4,
     "x": [-3.0, -1.0, 1.0, 3.0, 5.0],
     "f": [2.8198, 2.3562, 0.7854, 0.32175, 0.19740],
@@ -32,7 +34,6 @@ def spline_printer(S, x):
                   S[i-1][0],
                   S[i-1][4],
                   S[i-1][0]))
-
     # simple S line example: [x[i-1], A[i], B[i], C[i], D[i]]
 
 
@@ -85,12 +86,44 @@ def cubic_spline(x, f):
     return S
 
 
+def getx(spline, x, val):
+    fields = [(x[i-1], x[i]) for i in range(1, len(x))]
+    k = 0
+    for i, f in enumerate(fields):
+        if val < f[1] and val >= f[0]:
+            k = i
+            break
+    def calc(s, x):
+        return s[1]+s[2]*(x-s[0])+s[3]*((x-s[0])**2)+s[4]*((x-s[0])**3)
+    return calc(spline[k], val)
+
+def show_plot(S, x, save_file, step=0.1):
+    y = [getx(S, x, val) for val in x]
+
+    X = np.arange(x[0], x[-1], step)
+    Y = [getx(S, x, val) for val in X]
+    
+    fig, ax = plt.subplots()
+    ax.plot(X, Y)
+    ax.plot(x[:-1], y[:-1]) 
+
+    ax.set(title='Cubic spline')
+    ax.grid()
+
+    if save_file:
+        fig.savefig(save_file)
+        print(f"Saved in {save_file} succesfuly")
+        plt.close(fig) 
+
+    plt.show()
+
+
 def main():
     print(var)
-
     S = cubic_spline(raw_data["x"], raw_data["f"])
     spline_printer(S, raw_data["x"])
-
-
+    print("S({}) = {:5.3f}".format(raw_data["x*"], getx(S, raw_data["x"], raw_data["x*"])))
+    show_plot(S, raw_data["x"], "plot.png")
+        
 if __name__ == '__main__':
     main()
